@@ -1,0 +1,66 @@
+[build-system] 
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "CoordChemPy"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+description = "Allows to visualize a coordination compound and to give some of its characteristics. The CSD code of the wanted complex is needed and it has to be in the data base used."
+dependencies = [
+    # "rdkit",
+]
+authors = [
+    {name = "Michael Abiye Carr and Matéo Tatzber", email = "michael.abiyecarr@epfl.ch mateo.tatzber@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dynamic = ["version"]
+
+[project.urls]
+source = "https://github.com/mattatzb/CoordChemPy"
+tracker = "https://github.com/mattatzb/CoordChemPy/issues"
+
+[project.optional-dependencies]
+test = [
+    "hypothesis",
+    "pytest",
+    "pytest-cov",
+    "tox",
+    "genbadge[coverage]",
+]
+doc = [
+    "furo",
+    "myst-parser",
+    "sphinx>=5",
+    "sphinx-copybutton",
+]
+
+[tool.hatch.version]
+path = "src/coordchempy/__init__.py"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+omit = [
+    '__init__.py'
+]
+
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == .__main__.:",
+]

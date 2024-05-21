@@ -1,0 +1,11 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 66fd52c
+_src_path: gh:schwallergroup/copier-liac-minimal
+author_email: michael.abiyecarr@epfl.ch mateo.tatzber@gmail.com
+author_name: Michael Abiye Carr and Matéo Tatzber
+github_org: mattatzb
+package_name: coordchempy
+project_name: CoordChemPy
+short_description: Allows to visualize a coordination compound and to give some of
+    its characteristics. The CSD code of the wanted complex is needed and it has to
+    be in the data base used.

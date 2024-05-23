@@ -55,7 +55,7 @@ git clone https://github.com/mattatzb/CoordChemPy
 ````
 You can install CoordChemPy from the folder containing the cloned repository in your machine directly using pip:
 
-
+```
 pip install coordchempy
 ```
 

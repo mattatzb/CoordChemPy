@@ -26,18 +26,18 @@ from coordchempy import visualize_all_data
 # One line to rule them all
 result = visualize_all_data(CSD_code)
 ```
- the function visualize_all_data() returnes the 3D modelization of the molecule related to the CSD_code applied , the metal at the its center, the coordination number, the number of ligands contained in the complexe, the angles between bonds of the metal and the the geometry.  
+ The function visualize_all_data() returns the 3D modelization of the molecule related to the CSD_code applied , the metal at the its center, the coordination number, the number of ligands contained in the complexe, the angles between bonds of the metal and the the geometry.  
 
 
 ## 👩‍💻 Installation guide
-# 1. Prerequisites
+### 1. Prerequisites
 Before installing CoordChemPy, ensure that you have the following prerequisites:
 
 Python: CoordChemPy is compatible with Python 3.6 and above.
 Pip: Pip is the package installer for Python. It should come pre-installed with most Python distributions.
 
 
-# 2. Create a Virtual Environment (Optional but Recommended)
+### 2. Create a Virtual Environment (Optional but Recommended)
 Creating a virtual environment is recommended to keep your Python environment clean and isolated. You can skip this step if you prefer to install CoordChemPy globally.
 
 ```
@@ -48,7 +48,7 @@ python3 -m venv coordchempy_env
 source coordchempy_env/bin/activate
 ```
 
-# 3.  Install CoordChemPy
+### 3.  Install CoordChemPy
 Clone the repository to your local machine using git clone:
 ```
 git clone https://github.com/mattatzb/CoordChemPy
@@ -59,7 +59,7 @@ You can install CoordChemPy from the folder containing the cloned repository in 
 pip install coordchempy
 ```
 
-# 4. Verify Installation
+### 4. Verify Installation
 After installation, you can verify that CoordChemPy is installed correctly by importing it in a Python script or interpreter:
 
 ```
@@ -68,7 +68,7 @@ import coordchempy
 If no error is raised, CoordChemPy has been successfully installed.
 
 
-# 5. Usage
+### 5. Usage
 You are now ready to use CoordChemPy in your Python projects! Import the necessary functions and start visualizing and analyzing coordination compounds.
 
 ```

@@ -9,10 +9,12 @@ requires-python = ">=3.10"
 license = {file = "LICENSE"}
 description = "Allows to visualize a coordination compound and to give some of its characteristics. The CSD code of the wanted complex is needed and it has to be in the data base used."
 dependencies = [
-    # "rdkit",
+    "mendeleev",
+    "numpy",
+    "py3Dmol"
 ]
 authors = [
-    {name = "Michael Abiye Carr and Matéo Tatzber", email = "michael.abiyecarr@epfl.ch mateo.tatzber@gmail.com"}
+    {name = "Mateo Tatzber", email = "mateo.tatzber@epfl.ch"},
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

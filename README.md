@@ -20,7 +20,7 @@ Whether you are conducting academic research, teaching, or working in the pharma
 
 ## 🔥 Usage
 
-*```python
+```
 from coordchempy import visualize_all_data
 
 # One line to rule them all
@@ -30,23 +30,6 @@ result = visualize_all_data(CSD_code)*
 
 
 ## 👩‍💻 Installation
-
-*Create a new environment, you may also give the environment a different name. 
-
-```
-conda create -n coordchempy python=3.10 
-```
-
-```
-conda activate coordchempy
-(conda_env) $ pip install .
-```
-
-If you need jupyter lab, install it 
-
-```
-(coordchempy) $ pip install jupyterlab*
-```
 Installation Guide
 1. Prerequisites
 Before installing CoordChemPy, ensure that you have the following prerequisites:
@@ -56,14 +39,13 @@ Pip: Pip is the package installer for Python. It should come pre-installed with 
 2. Create a Virtual Environment (Optional but Recommended)
 Creating a virtual environment is recommended to keep your Python environment clean and isolated. You can skip this step if you prefer to install CoordChemPy globally.
 
-bash
-Copy code
+```
 # Create a new virtual environment
 python3 -m venv coordchempy_env
 
 # Activate the virtual environment
 source coordchempy_env/bin/activate
- 
+```
 
 3. Install CoordChemPy
 clone the repository to your local machine using git clone:

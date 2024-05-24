@@ -74,10 +74,17 @@ You are now ready to use CoordChemPy in your Python projects! Import the necessa
 ```
 from coordchempy import visualize_all_data
 
-# Example usage
+## Example usage
 visualize_all_data('TEZWUS')
 ```
 This installation guide provides step-by-step instructions for installing CoordChemPy, including optional steps for creating a virtual environment and installing additional dependencies.
+
+## Testing
+Make sure that you have pytest installed on your environment and run the test from the folder containing the cloned repository on your terminal:
+
+````
+pytest #Run all the test in the test_coordchempy.py file
+````
 
 ## 🛠️ Development installation
 
@@ -87,11 +94,10 @@ Note: You should have create an empty repository on `https://github.com:username
 
 ```
 git init
-git add * 
-git add .*
+git add .
 git commit -m "Initial commit" 
 git branch -M main
-git remote add origin git@github.com:username/Name_Of_Package.git 
+git remote add origin git@github.com:username/name_of_repository.git 
 git push -u origin main
 ```
 

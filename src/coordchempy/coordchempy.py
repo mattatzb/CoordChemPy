@@ -3,6 +3,7 @@ from mendeleev import element
 import numpy as np
 import py3Dmol
 import os
+from typing import List, Tuple
 
 # Calculate the absolute paths to the data files
 file_path_1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'tmQM_X1.xyz'))
@@ -92,7 +93,7 @@ def read_xyz(keyword):
         tuple: A tuple containing lists of atoms and their coordinates.
     """
     # Call read_lines_around_keyword with default filenames to get the number of atom
-    xyz_data, num_atoms_line, total_charge = read_lines_around_keyword(keyword)
+    xyz_data, _, total_charge = read_lines_around_keyword(keyword)
     
     # Split the XYZ data into lines
     xyz_data_lines = xyz_data.split('\n')
@@ -160,7 +161,7 @@ def find_ligands(atoms, coordinates, tolerance=0.4):
     Returns:
         list: List of the  atom symbol linked to the central one.
     """
-    central_atom_symbol, central_atom_index = find_central_atom(atoms)
+    _, central_atom_index = find_central_atom(atoms)
     bonds = infer_bonds(atoms, coordinates, tolerance)
     ligands = []
     for bond in bonds:

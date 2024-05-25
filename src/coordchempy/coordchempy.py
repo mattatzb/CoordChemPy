@@ -4,6 +4,8 @@ import numpy as np
 import py3Dmol
 import os
 from typing import List, Tuple
+import numba
+from numba import jit
 
 # Calculate the absolute paths to the data files
 file_path_1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'tmQM_X1.xyz'))
@@ -93,7 +95,7 @@ def read_xyz(keyword):
         tuple: A tuple containing lists of atoms and their coordinates.
     """
     # Call read_lines_around_keyword with default filenames to get the number of atom
-    xyz_data, _, total_charge = read_lines_around_keyword(keyword)
+    xyz_data, _, _ = read_lines_around_keyword(keyword)
     
     # Split the XYZ data into lines
     xyz_data_lines = xyz_data.split('\n')
@@ -121,17 +123,26 @@ def infer_bonds(atoms, coordinates, tolerance=0.4):
     Returns:
         list: List of tuples representing bonded atom indices.
     """
-    bonds = []
-    num_atoms = len(atoms)
+    bonds = []  # Initialize an empty list to store the bonds.
+    
+    num_atoms = len(atoms)  # Get the total number of atoms in the molecule.
+    
+    # Iterate over each pair of atoms to check for potential bonds.
     for i in range(num_atoms):
         for j in range(i + 1, num_atoms):
-            atom1, atom2 = atoms[i], atoms[j]
-            coord1, coord2 = coordinates[i], coordinates[j]
-            distance = calculate_distance(coord1, coord2)
+            atom1, atom2 = atoms[i], atoms[j]  # Get the symbols of the two atoms being considered.
+            coord1, coord2 = coordinates[i], coordinates[j]  # Get the 3D coordinates of these atoms.
+            
+            distance = calculate_distance(coord1, coord2)  # Calculate the Euclidean distance between the two atoms.
+            
+            # Calculate the maximum allowable distance for a bond, which is the sum of their covalent radii plus a tolerance.
             max_distance = get_covalent_radius(atom1) + get_covalent_radius(atom2) + tolerance
+            
+            # If the actual distance is less than or equal to the maximum allowable distance, a bond is inferred.
             if distance <= max_distance:
-                bonds.append((i, j))
-    return bonds
+                bonds.append((i, j))  # Add the indices of the bonded atoms as a tuple to the bonds list.
+    
+    return bonds  # Return the list of inferred bonds.
 
 def find_central_atom(atoms):
     """
@@ -143,10 +154,16 @@ def find_central_atom(atoms):
     Returns:
         tuple: A tuple containing the symbol and index of the central atom.
     """
+    # Define a set of atomic numbers corresponding to transition metals.
     transition_metal_atomic_numbers = set(range(21, 31)) | set(range(39, 49)) | set(range(72, 81)) | set(range(104, 113)) | {57, 89}
+    
+    # Iterate over the list of atoms, with 'i' as the index and 'atom' as the atom symbol.
     for i, atom in enumerate(atoms):
+        # Check if the atomic number of the current atom is in the set of transition metal atomic numbers.
         if element(atom).atomic_number in transition_metal_atomic_numbers:
-            return atom, i
+            return atom, i  # Return the atom symbol and its index if it's a transition metal.
+    
+    # If no transition metal is found, raise a ValueError.
     raise ValueError("No central atom found in the molecule.")
 
 def find_ligands(atoms, coordinates, tolerance=0.4):
@@ -159,18 +176,31 @@ def find_ligands(atoms, coordinates, tolerance=0.4):
         tolerance (float, optional): Tolerance factor for bond determination. Defaults to 0.4.
 
     Returns:
-        list: List of the  atom symbol linked to the central one.
+        list: List of the atom symbols linked to the central one.
     """
+    # Find the central atom and its index in the list of atoms.
     _, central_atom_index = find_central_atom(atoms)
+    
+    # Infer bonds between atoms based on distances and covalent radii.
     bonds = infer_bonds(atoms, coordinates, tolerance)
+    
+    # Initialize an empty list to store the symbols of the ligands.
     ligands = []
+    
+    # Iterate over the list of inferred bonds.
     for bond in bonds:
+        # Check if the central atom index is part of the current bond.
         if central_atom_index in bond:
+            # Determine the index of the ligand atom in the bond.
             ligand_index = bond[1] if bond[0] == central_atom_index else bond[0]
+            # Append the symbol of the ligand atom to the ligands list.
             ligands.append(atoms[ligand_index])
+    
+    # Return the list of ligand atom symbols.
     return ligands
 
-def find_actual_ligand_count(atoms, coordinates, bonds, central_atom_index):
+@jit(nopython=True)
+def find_actual_ligand_count(atoms, bonds, central_atom_index):
     """
     Find the actual count of ligands bonded to the central atom.
 
@@ -212,7 +242,7 @@ def find_actual_ligand_count(atoms, coordinates, bonds, central_atom_index):
 
     return len(unique_ligands)
 
-
+@jit(nopython=True)
 def calculate_angle(coord1, coord2, coord3):
     """
     Calculate the angle between three points in 3D space.
@@ -254,37 +284,53 @@ def determine_geometry(angles, coordination_number):
     Returns:
         str: The name of the molecular geometry.
     """
+    # Check if the coordination number is 2.
     if coordination_number == 2:
+        # For coordination number 2, if there is exactly one angle between 160 and 180 degrees, it's linear.
         if len(angles) == 1 and 160 <= angles[0] <= 180:
             return 'linear'
 
+    # Check if the coordination number is 3.
     if coordination_number == 3:
+        # For coordination number 3, if there are three angles between 95 and 145 degrees, it's trigonal planar.
         if len(angles) == 3 and all(95 <= angle <= 145 for angle in angles):
             return 'trigonal planar'
 
+    # Check if the coordination number is 4.
     if coordination_number == 4:
+        # For coordination number 4, if there are six angles, it could be square planar or tetrahedral.
         if len(angles) == 6:
+            # If two angles are between 160 and 180 degrees and the rest are between 65 and 115 degrees, it's square planar.
             if sum(160 <= angle <= 180 for angle in angles) == 2 and all(65 <= angle <= 115 for angle in angles if not (160 <= angle <= 180)):
                 return 'square planar'
+            # If all angles are between 85 and 135 degrees, it's tetrahedral.
             elif all(85 <= angle <= 135 for angle in angles):
                 return 'tetrahedral'
 
+    # Check if the coordination number is 5.
     if coordination_number == 5:
+        # For coordination number 5, if there are ten angles, it could be trigonal bipyramidal, square pyramidal, or seesaw.
         if len(angles) == 10:
+            # If one angle is between 160 and 180 degrees, three angles are between 95 and 145 degrees, and the rest are between 65 and 115 degrees, it's trigonal bipyramidal.
             if sum(160 <= angle <= 180 for angle in angles) == 1 and sum(95 <= angle <= 145 for angle in angles) == 3 and all(65 <= angle <= 115 for angle in angles if not (95 <= angle <= 145 or 160 <= angle <= 180)):
                 return 'trigonal bipyramidal'
+            # If any angle is between 55 and 95 degrees and the rest are between 75 and 115 degrees, it's square pyramidal.
             elif any(55 <= angle <= 95 for angle in angles) and all(75 <= angle <= 115 for angle in angles if angle > 95):
                 return 'square pyramidal'
+            # If there are three distinct angle values, any angle is between 65 and 95 degrees, and the maximum angle is between 105 and 135 degrees, it's seesaw.
             elif len(set([round(angle) for angle in angles])) == 3 and any(65 <= angle <= 95 for angle in angles) and 105 <= max(angles) <= 135:
                 return 'seesaw'
 
+    # Check if the coordination number is 6.
     if coordination_number == 6:
+        # For coordination number 6, if there are fifteen angles, it could be octahedral.
         if len(angles) == 15:
+            # If three angles are between 160 and 180 degrees and the rest are between 65 and 115 degrees, it's octahedral.
             if sum(160 <= angle <= 180 for angle in angles) == 3 and all(65 <= angle <= 115 for angle in angles if not (160 <= angle <= 180)):
                 return 'octahedral'
 
+    # If no known geometry matches, return 'unknown'.
     return 'unknown'
-
 
 def calculate_angles_and_geometry(atoms, coordinates):
     """
@@ -297,21 +343,33 @@ def calculate_angles_and_geometry(atoms, coordinates):
     Returns:
         tuple: A tuple containing lists of bond angles and the name of the molecular geometry.
     """
+    # Find the central atom and its index in the molecule.
     _, central_atom_index = find_central_atom(atoms)
+
+    # Infer the bonds between atoms based on their coordinates and covalent radii.
     bonds = infer_bonds(atoms, coordinates)
 
+    # Identify the indices of the ligands directly bonded to the central atom.
     ligand_indices = [i for i, atom in enumerate(atoms) if (central_atom_index, i) in bonds or (i, central_atom_index) in bonds]
 
+    # Initialize an empty list to store the bond angles.
     angles = []
+
+    # Calculate bond angles between each pair of ligands.
     for i in range(len(ligand_indices)):
         for j in range(i + 1, len(ligand_indices)):
-            angle = calculate_angle(coordinates[ligand_indices[i]], coordinates[central_atom_index],  coordinates[ligand_indices[j]])
+            # Calculate the bond angle between ligand i, the central atom, and ligand j.
+            angle = calculate_angle(coordinates[ligand_indices[i]], coordinates[central_atom_index], coordinates[ligand_indices[j]])
+            # Append the calculated angle to the angles list.
             angles.append(angle)
 
+    # Determine the coordination number based on the number of ligands.
     coordination_number = len(ligand_indices)
 
+    # Determine the molecular geometry based on the calculated bond angles and coordination number.
     geometry = determine_geometry(angles, coordination_number)
-        
+
+    # Return the list of bond angles and the name of the molecular geometry.
     return angles, geometry
 
 def cn(keyword):
@@ -402,7 +460,6 @@ def visualize (keyword):
     # Render the viewer
     viewer.show()
 
-
 def visualize_all_data(keyword):
     """
     Visualize the molecule specified by the keyword and print its characteristics.
@@ -414,9 +471,9 @@ def visualize_all_data(keyword):
     cn = len(find_ligands(atoms, coordinates))
     bonds = infer_bonds(atoms, coordinates)
     central_atom_symbol, central_atom_index = find_central_atom(atoms)
-    ligand_counts = find_actual_ligand_count(atoms, coordinates, bonds, central_atom_index)
+    ligand_counts = find_actual_ligand_count(atoms, bonds, central_atom_index)
     angles, geometry = calculate_angles_and_geometry(atoms, coordinates)
-    xyz_data, lines_after, total_charge = read_lines_around_keyword(keyword)
+    xyz_data, _, total_charge = read_lines_around_keyword(keyword)
     
     # Print the symbol of the central atom
     print(f"The symbol of the central atom is {central_atom_symbol}.")

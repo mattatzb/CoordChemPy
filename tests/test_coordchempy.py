@@ -86,8 +86,8 @@ TEST_DATA = {
     }
 
 
-# Test the function
-
+# Test the functions
+# The functions visualize and visualize_label have to be test manually and one can use the website https://www.ccdc.cam.ac.uk/ to check if the 3D model is correct
 # Test calculate_distance function
 def test_calculate_distance():
     # Define test cases and expected results

@@ -3,9 +3,6 @@ from mendeleev import element
 import numpy as np
 import py3Dmol
 import os
-from typing import List, Tuple
-import numba
-from numba import jit
 
 # Calculate the absolute paths to the data files
 file_path_1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'tmQM_X1.xyz'))
@@ -199,7 +196,6 @@ def find_ligands(atoms, coordinates, tolerance=0.4):
     # Return the list of ligand atom symbols.
     return ligands
 
-@jit(nopython=True)
 def find_actual_ligand_count(atoms, bonds, central_atom_index):
     """
     Find the actual count of ligands bonded to the central atom.
@@ -242,7 +238,6 @@ def find_actual_ligand_count(atoms, bonds, central_atom_index):
 
     return len(unique_ligands)
 
-@jit(nopython=True)
 def calculate_angle(coord1, coord2, coord3):
     """
     Calculate the angle between three points in 3D space.

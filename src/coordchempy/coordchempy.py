@@ -108,7 +108,7 @@ def read_xyz(keyword):
     
     return atoms, coordinates
 
-def infer_bonds(atoms, coordinates, tolerance=0.4):
+def infer_bonds(atoms, coordinates, tolerance=0.4, spe=False):
     """
     Infer bonds between atoms based on distances and covalent radii.
 
@@ -121,23 +121,39 @@ def infer_bonds(atoms, coordinates, tolerance=0.4):
         list: List of tuples representing bonded atom indices.
     """
     bonds = []  # Initialize an empty list to store the bonds.
-    
     num_atoms = len(atoms)  # Get the total number of atoms in the molecule.
-    
+
+    if spe == True:
+    # Allow to calculate only the bonds with the central atom
+        _, central_atom_index = find_central_atom(atoms)
+        for i in range(num_atoms):
+            if i != central_atom_index:
+                atom1, atom2 = atoms[i], atoms[central_atom_index]  # Get the symbols of the two atoms being considered.
+                coord1, coord2 = coordinates[i], coordinates[central_atom_index]  # Get the 3D coordinates of these atoms.
+                
+                distance = calculate_distance(coord1, coord2)  # Calculate the Euclidean distance between the two atoms.
+                
+                # Calculate the maximum allowable distance for a bond, which is the sum of their covalent radii plus a tolerance.
+                max_distance = get_covalent_radius(atom1) + get_covalent_radius(atom2) + tolerance
+                
+                # If the actual distance is less than or equal to the maximum allowable distance, a bond is inferred.
+                if distance <= max_distance:
+                    bonds.append((i, central_atom_index))  # Add the indices of the bonded atoms as a tuple to the bonds list.
+    else:
     # Iterate over each pair of atoms to check for potential bonds.
-    for i in range(num_atoms):
-        for j in range(i + 1, num_atoms):
-            atom1, atom2 = atoms[i], atoms[j]  # Get the symbols of the two atoms being considered.
-            coord1, coord2 = coordinates[i], coordinates[j]  # Get the 3D coordinates of these atoms.
-            
-            distance = calculate_distance(coord1, coord2)  # Calculate the Euclidean distance between the two atoms.
-            
-            # Calculate the maximum allowable distance for a bond, which is the sum of their covalent radii plus a tolerance.
-            max_distance = get_covalent_radius(atom1) + get_covalent_radius(atom2) + tolerance
-            
-            # If the actual distance is less than or equal to the maximum allowable distance, a bond is inferred.
-            if distance <= max_distance:
-                bonds.append((i, j))  # Add the indices of the bonded atoms as a tuple to the bonds list.
+        for i in range(num_atoms):
+            for j in range(i + 1, num_atoms):
+                atom1, atom2 = atoms[i], atoms[j]  # Get the symbols of the two atoms being considered.
+                coord1, coord2 = coordinates[i], coordinates[j]  # Get the 3D coordinates of these atoms.
+                
+                distance = calculate_distance(coord1, coord2)  # Calculate the Euclidean distance between the two atoms.
+                
+                # Calculate the maximum allowable distance for a bond, which is the sum of their covalent radii plus a tolerance.
+                max_distance = get_covalent_radius(atom1) + get_covalent_radius(atom2) + tolerance
+                
+                # If the actual distance is less than or equal to the maximum allowable distance, a bond is inferred.
+                if distance <= max_distance:
+                    bonds.append((i, j))  # Add the indices of the bonded atoms as a tuple to the bonds list.
     
     return bonds  # Return the list of inferred bonds.
 
@@ -179,19 +195,17 @@ def find_ligands(atoms, coordinates, tolerance=0.4):
     _, central_atom_index = find_central_atom(atoms)
     
     # Infer bonds between atoms based on distances and covalent radii.
-    bonds = infer_bonds(atoms, coordinates, tolerance)
+    bonds = infer_bonds(atoms, coordinates, tolerance, True)
     
     # Initialize an empty list to store the symbols of the ligands.
     ligands = []
     
     # Iterate over the list of inferred bonds.
     for bond in bonds:
-        # Check if the central atom index is part of the current bond.
-        if central_atom_index in bond:
-            # Determine the index of the ligand atom in the bond.
-            ligand_index = bond[1] if bond[0] == central_atom_index else bond[0]
-            # Append the symbol of the ligand atom to the ligands list.
-            ligands.append(atoms[ligand_index])
+         # Determine the index of the ligand atom in the bond.
+        ligand_index = bond[1] if bond[0] == central_atom_index else bond[0]
+        # Append the symbol of the ligand atom to the ligands list.
+        ligands.append(atoms[ligand_index])   
     
     # Return the list of ligand atom symbols.
     return ligands
@@ -403,6 +417,7 @@ def visualize_label(keyword):
     """
     atoms, _ = read_xyz(keyword)
     xyz_data, _, _ = read_lines_around_keyword(keyword)
+    _, coordinates = read_xyz(keyword)
 
     # Initialize a viewer
     viewer = py3Dmol.view()

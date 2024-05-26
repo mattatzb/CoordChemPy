@@ -184,13 +184,12 @@ def test_find_ligands():
 def test_find_actual_ligand_count():
     # Define test cases and expected results
     atoms = TEST_DATA['atoms']
-    coordinates = TEST_DATA['expected_coordinates']
     bonds = TEST_DATA['expected_bonds']
     central_atom_index = 0
     expected_output = 4
     
     # Call the function
-    output = find_actual_ligand_count(atoms, coordinates, bonds, central_atom_index)
+    output = find_actual_ligand_count(atoms, bonds, central_atom_index)
     
     # Check the result
     assert output == expected_output, f"Expected output: {expected_output}, Got: {output}"
@@ -257,4 +256,4 @@ def test_charge():
     
     # Call the function
     output = charge(keyword)
-    
+    assert output == expected_output, f"Expected output: {expected_output}, Got: {output}"
